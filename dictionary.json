@@ -1,5 +1,6 @@
 {
     "bonk": "Aplasta la imagen.",
     "siis": "Efecto espejo al lado izquierdo de la imagen.",
-    "issi": "Efecto espejo al lado derecho de la imagen."
+    "issi": "Efecto espejo al lado derecho de la imagen.",
+    "img": "Busca imagenes en google, solo quien hace la petición puede cambiar de imagen."
 }

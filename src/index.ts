@@ -11,4 +11,4 @@ app.get("/", (req, res)=> {
 })
 
 
-BotController;
+BotController.init();

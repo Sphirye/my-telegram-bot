@@ -1,27 +1,67 @@
-import TelegramBot, { InlineQueryResult, Message } from 'node-telegram-bot-api';
-import {isAllowed, register} from './Permission';
-import { contienePalabrasProhibidas } from './blocked';
-import { sendMessageToChannel } from './channel';
-import ConstantTool from "../services/tools/ConstantTool";
-import sharp from 'sharp';
-import ImageServices from '../services/ImageServices';
-import FileServices from "../services/FileServices";
+import TelegramBot, { InlineQueryResult, Message } from 'node-telegram-bot-api'
+import {isAllowed, register} from './Permission'
+import { contienePalabrasProhibidas } from './blocked'
+import { sendMessageToChannel } from './channel'
+import ConstantTool from "../services/tools/ConstantTool"
+import ImageServices from '../services/ImageServices'
+import FileServices from "../services/FileServices"
+import ImageSearchHandler from './ImageSearchHandler'
+import CommandTool from "../services/tools/CommandTool"
 
 const axios = require('axios')
 const text2png = require('text2png');
 
-function init(): void{
+function init(): void {
 
     const bot = new TelegramBot(ConstantTool.TELEGRAM_BOT_TOKEN as string, {polling: true});      
-    const bannedList: { 
-        [key: string]: number 
-    } = {};
+    const bannedList: { [key: string]: number } = {};
 
-    //bot.sendMessage(-341965778, "Hey guys, TF2 Soldier here")
-
+    bot.on("polling_error", console.log);
+    
     bot.on("message", (msg) => {
-
         const sender_id = msg.chat.id;
+
+        if (CommandTool.isCommand(msg)) {
+            let command = CommandTool.getCommand(msg)
+            
+            switch (command) {
+                case "siis": { ImageServices.siis(bot, msg) } break
+                case "issi": { ImageServices.issi(bot, msg) } break
+                case "bonk": { ImageServices.bonk(bot, msg) } break
+                case "checkUrl": { bot.sendMessage(sender_id, FileServices.getCommonURL(msg.text!)!) } break
+                case "img":  { 
+                    bot.sendMessage(sender_id, "Just a moment, sir.").then((message: Message) => {
+
+                        const imageSearch = new ImageSearchHandler(bot, message, `${msg.text?.substring(command!.length + 1)}`)
+                        
+                        setTimeout(() => {
+                            imageSearch.destroy()
+                        },
+                        180000)
+
+
+                        bot.addListener("callback_query", (btn) => {
+                            const data = btn.data
+
+                            switch (data) {
+                                case "previous_img": {
+                                    if (msg!.from!.username == btn.from.username) {
+                                        imageSearch.previous()
+                                    }
+                                } break
+                                
+                                case "next_img": {
+                                    if (msg!.from!.username == btn.from.username) {
+                                        imageSearch.next()
+                                    }
+                                } break
+                            }
+                        })
+        
+                    })
+                } break
+            }
+        }
 
         if (msg.text && contienePalabrasProhibidas(msg.text)){
             
@@ -35,24 +75,6 @@ function init(): void{
                 })
             }
         }
-
-        if (command(msg, "/url")) {
-            let bruh = FileServices.getCommonURL(msg.text!);
-            bot.sendMessage(sender_id, bruh)
-        }
-
-        if (command(msg, "/siis")) {
-            ImageServices.siis(bot, msg)
-        }
-
-        if (command(msg, "/issi")) {
-            ImageServices.issi(bot, msg)
-        }
-
-        if (command(msg, "/bonk")) {
-            ImageServices.bonk(bot, msg)
-        }
-
     })
 
     bot.on("inline_query", (qry) => {
@@ -71,28 +93,33 @@ function init(): void{
     })
 }
 
-function command(msg: Message, command: string) {
+class ImageSearch {
 
-    let text: string = ""
-    let firstWord: string = ""
+    bot: TelegramBot
+    index: number
+    avaliable: boolean
+    
+    constructor(bot: TelegramBot) {
+        this.index = 0
+        this.bot = bot
+        this.avaliable = true
+    }
 
-    if (msg.text) {
-        text = msg.text
-    } else {
-        if (msg.caption) {
-            text = msg.caption
+    previous() {
+        if (this.index != 0) {
+            this.index -= 1
+            this.bot.sendMessage(-341965778, "previous " + this.index)
         }
     }
 
-    for(let letter of text) {
-        if (letter != " ") {
-            firstWord = firstWord + letter
-        } else {
-            break;
-        }
+    next() {
+        this.index += 1
+        this.bot.sendMessage(-341965778, "next "  + this.index)
     }
 
-    return (firstWord === command)
+    reset() {
+        this.index = 0
+    }
 }
 
 function dictionarySearch(text: string): Array<[string, string]>{
