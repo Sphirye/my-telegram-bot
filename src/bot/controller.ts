@@ -8,12 +8,12 @@ import FileServices from "../services/FileServices"
 import ImageSearchHandler from './ImageSearchHandler'
 import CommandTool from "../services/tools/CommandTool"
 
+
 const axios = require('axios')
 const text2png = require('text2png');
 
 function init(): void {
-
-    const bot = new TelegramBot(ConstantTool.TELEGRAM_BOT_TOKEN as string, {polling: true});      
+    const bot = new TelegramBot(ConstantTool.TELEGRAM_BOT_TOKEN, {polling: true});      
     const bannedList: { [key: string]: number } = {};
 
     bot.on("polling_error", console.log);

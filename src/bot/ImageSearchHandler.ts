@@ -1,11 +1,12 @@
 import axios from "axios"
 import TelegramBot, { Message } from "node-telegram-bot-api"
+import ConstantTool from "../services/tools/ConstantTool"
 import JsonTool from "../services/tools/JsonTool"
 import GoogleImg from "./models/GoogleImg"
 
 
 async function getResponse(query: string) {
-    let response = await axios.get(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDQDfqSZtOePYzu4cKjPLaYP0dFxQGa1Dk&cx=e056d1bc433db6bee&q=${query}&searchType=IMAGE`)
+    let response = await axios.get(`https://www.googleapis.com/customsearch/v1?key=${ConstantTool.GOOGLE_IMAGE_API_KEY}&cx=e056d1bc433db6bee&q=${query}&searchType=IMAGE`)
     let img = JsonTool.jsonConvert.deserializeArray(response.data.items, GoogleImg)
     return img
 }
