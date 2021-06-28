@@ -1,6 +1,6 @@
 import { Message } from "node-telegram-bot-api"
 
-let commands = ["siis", "issi", "bonk", "img", "checkUrl"]
+let commands = ["siis", "issi", "bonk", "img", "checkUrl", "ascii"]
 let prefix = "$"
 
 export default class CommandTool {

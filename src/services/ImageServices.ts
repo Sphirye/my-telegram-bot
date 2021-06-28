@@ -6,6 +6,8 @@ import FileServices from "./FileServices";
 import ConstantTool from "./tools/ConstantTool";
 const text2png = require('text2png');
 const axios = require('axios')
+//@ts-ignore
+import imageToAscii from 'image-to-ascii'
 
 const caption:string = "Here's your photo, sir."
 
@@ -98,14 +100,37 @@ export default class ImageServices {
         }
     }
 
+    static async ascii(bot: TelegramBot, msg: Message) {
+        const sender_id = msg.chat.id
+
+        let url = await this.getUrl(bot, msg)
+
+        if (url == undefined) {
+            bot.sendMessage(sender_id, "I founded no links in there, sir.")
+        } else {
+            imageToAscii(url, { 
+                colored: false,
+                size: { width: 100/2, height: 40 },
+                size_options: { screen_size: { width: 100, height: 100 }, preserve_aspect_ratio: false },
+                white_bg: true
+            }, (err: any, converted: string) => {
+                bot.sendMessage(sender_id , "```" + converted + "```", { parse_mode: "MarkdownV2" })
+            })
+        }
+
+    }
+
     static async getUrl(bot: TelegramBot, msg: Message){
         if (msg.photo) {
             return await FileServices.getPhotoURL(bot, msg)
         }
 
         if (!msg.photo) {
-            console.log(FileServices.getCommonURL(msg.text!))
-            return FileServices.getCommonURL(msg.text!)
+            return FileServices.getCommonURL(msg)
+        }
+
+        if ((msg.text == undefined) && (!msg.photo)) {
+            bot.sendMessage(msg.chat.id, "I don't see any link in there, sir.")
         }
     }
 }

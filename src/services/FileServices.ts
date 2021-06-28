@@ -1,4 +1,5 @@
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
+import BotController from "../bot/controller";
 import ConstantTool from "./tools/ConstantTool";
 
 export default class FileServices {
@@ -8,15 +9,17 @@ export default class FileServices {
         return `https://api.telegram.org/file/bot${ConstantTool.TELEGRAM_BOT_TOKEN}/${file.file_path}`
     }
 
-    static getCommonURL(text: string): string | undefined {
+    static getCommonURL(msg: Message): string | undefined {
+        let text = msg.text
         var urlRegex =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         let extractedURL: string | undefined = undefined
         
-        text.replace(urlRegex, function(url) {
+        
+        text?.replace(urlRegex, function(url) {
             extractedURL = url;
             return url;
         }) 
-
+        
         return extractedURL
     }
 

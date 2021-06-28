@@ -7,10 +7,12 @@ import ImageServices from '../services/ImageServices'
 import FileServices from "../services/FileServices"
 import ImageSearchHandler from './ImageSearchHandler'
 import CommandTool from "../services/tools/CommandTool"
+import sharp from 'sharp'
 
 
 const axios = require('axios')
-const text2png = require('text2png');
+const text2png = require('text2png')
+const img2ascii = require('image-to-ascii')
 
 function init(): void {
     const bot = new TelegramBot(ConstantTool.TELEGRAM_BOT_TOKEN, {polling: true});      
@@ -18,7 +20,7 @@ function init(): void {
 
     bot.on("polling_error", console.log);
     
-    bot.on("message", (msg) => {
+    bot.on("message", async (msg) => {
         const sender_id = msg.chat.id;
 
         if (CommandTool.isCommand(msg)) {
@@ -28,12 +30,13 @@ function init(): void {
                 case "siis": { ImageServices.siis(bot, msg) } break
                 case "issi": { ImageServices.issi(bot, msg) } break
                 case "bonk": { ImageServices.bonk(bot, msg) } break
-                case "checkUrl": { bot.sendMessage(sender_id, FileServices.getCommonURL(msg.text!)!) } break
+                case "ascii": { ImageServices.ascii(bot, msg) } break
                 case "img":  { 
+                    console.log("IMG")
                     bot.sendMessage(sender_id, "Just a moment, sir.").then((message: Message) => {
 
                         const imageSearch = new ImageSearchHandler(bot, message, `${msg.text?.substring(command!.length + 1)}`)
-                        
+
                         setTimeout(() => {
                             imageSearch.destroy()
                         },
