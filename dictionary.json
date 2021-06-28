@@ -2,5 +2,6 @@
     "bonk": "Aplasta la imagen.",
     "siis": "Efecto espejo al lado izquierdo de la imagen.",
     "issi": "Efecto espejo al lado derecho de la imagen.",
-    "img": "Busca imagenes en google, solo quien hace la petición puede cambiar de imagen."
+    "img": "Busca imagenes en google, solo quien hace la petición puede cambiar de imagen.",
+    "ascii": "Recibe una imagen y la convierte a arte ASCII."
 }
